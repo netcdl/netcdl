@@ -1,0 +1,106 @@
+/*
+    NETCDL Language Grammar
+    Copyright 2016 Cody Hanson
+*/
+
+Document:
+    statements+=Statement
+;
+
+NonWhiteSpace:
+    /[^\s\n,\[\]]+/
+;
+
+Statement:
+    Comment | NetworkDefineStatement | HostDefineStatement | LinkStatement
+    | PacketStatement | PortOpenStatement | PingStatement | TraceRouteStatement | FileFetchStatement | DHCPStatement
+    | VlanStatement | DNSStatement | IperfStatement
+;
+
+HostDefineStatement:
+    'define host' name=NonWhiteSpace 'as' value=NonWhiteSpace
+;
+
+NetworkDefineStatement:
+    'define network' name=NonWhiteSpace 'as' value=NonWhiteSpace
+;
+
+IperfStatement:
+    'iperf' direction=/upload to|download from/ server=NonWhiteSpace 'should be at' comparison=/least|most/ bitrate=NonWhiteSpace
+;
+
+DHCPStatement:
+    'dhcp' type=/server|dns|network|gateway/ should=Should 'be' value=NonWhiteSpace
+;
+
+ReachabilityClause:
+    host=NonWhiteSpace should=Should 'be reachable'
+;
+
+PortOpenStatement:
+     reachable=ReachabilityClause 'on' protocol=/TCP|UDP/ 'port' port=INT
+;
+
+PingStatement:
+     reachable=ReachabilityClause 'by ping'
+;
+
+DNSStatement:
+    'domain name' domain=NonWhiteSpace should=Should 'resolve' ('to' resolve_to=NonWhiteSpace)? 'using server' server=NonWhiteSpace
+;
+
+FileFetchStatement:
+    protocol=/http|ftp|tftp/ 'server at' target=NonWhiteSpace should=Should 'serve' filename=STRING ('on port' port=INT)?
+;
+
+TraceRouteStatement:
+    'traceroute to' host=NonWhiteSpace 'should traverse' '[' routers+=NonWhiteSpace ']'
+;
+
+Should:
+    /should(\s+not)?/
+;
+
+LinkSpeed:
+    /\d+Mb\/s/
+;
+
+VlanStatement:
+    'access vlan' should=Should 'be' vlan=INT
+;
+
+LinkStatement:
+    LinkSpeedStatement | LinkDuplexStatement
+;
+
+LinkSpeedStatement:
+    'link speed' should=Should 'be' speed=LinkSpeed
+;
+
+LinkDuplexStatement:
+    'link duplex' should=Should 'be' duplex=/half|full/
+;
+
+PacketFromStatement:
+    'packets from' type=/host|network/ target=NonWhiteSpace should=Should 'be seen'
+;
+
+PacketTypeStatement:
+    'packets with type' value=NonWhiteSpace should=Should 'be seen'
+;
+
+FrameTypeStatement:
+    'frames with ethertype' value=NonWhiteSpace should=Should 'be seen'
+;
+
+PacketPortStatement:
+    'packets with' protocol=/TCP|UDP/ direction=/source|destination/ 'port' port=INT should=Should 'be seen'
+;
+
+PacketStatement:
+    PacketFromStatement | PacketPortStatement | PacketTypeStatement | FrameTypeStatement
+;
+
+Comment:
+    /^#.*/
+;

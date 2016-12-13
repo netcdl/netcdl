@@ -1,0 +1,25 @@
+
+define host myRouter as 192.168.1.1
+define network myNetwork as 192.168.1.0/24
+
+link speed should be 1000Mb/s
+link duplex should be full
+
+iperf download from ent.local should be at most 30Kbps
+
+dhcp server should be myRouter
+
+myRouter should be reachable by ping
+
+domain name google.com should resolve using server 8.8.8.8
+
+google.com should be reachable on TCP port 22
+
+http server at myRouter should not serve "/path/to/file" on port 8080
+
+traceroute to 10.0.0.1 should traverse [192.168.1.1]
+
+packets from network DMZ should not be seen
+packets with type 0x18 should not be seen
+packets with TCP source port 1000 should not be seen
+frames with ethertype 0x18 should be seen
